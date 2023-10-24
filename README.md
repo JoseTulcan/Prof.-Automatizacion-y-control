@@ -1,2 +1,2 @@
-# Prof.-Automatizaci-y-control
+# Prof.-Automatizacion-y-control
 Todas las actividades de la profundización de automatización y control.

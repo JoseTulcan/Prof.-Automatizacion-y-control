@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="D:/ESCRITORIO/UDENAR/8 SEMESTRE/PROFUNDIZACION A Y C/Taller ESTUDIO PARCIAL 1/datos_cultivos-main/datos_cultivos.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="2682"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,17:mainMedicion_sensores"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Cultivos" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="95"/><column index="2" value="145"/><column index="3" value="162"/><column index="4" value="143"/><column index="5" value="79"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Finca" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="79"/><column index="2" value="129"/><column index="3" value="118"/><column index="4" value="122"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Medicion_sensores" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="202"/><column index="2" value="94"/><column index="3" value="142"/><column index="4" value="162"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Personal" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="111"/><column index="2" value="76"/><column index="3" value="52"/><column index="4" value="98"/><column index="5" value="82"/><column index="6" value="213"/><column index="7" value="79"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Ventas" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="85"/><column index="2" value="162"/><column index="3" value="112"/><column index="4" value="95"/></column_widths><filter_values><column index="3" value="5611329"/></filter_values><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">--TALLER ESTUDIO PARCIAL 1 - PROFUNDIZACIÓN A Y C. 
+--## Ejercicios
+--1. Listar el nombre de las fincas y el nombre de sus propietarios 
+SELECT nombre_finca, propietario FROM Finca ;
+
+--2. Identificar cuantos cultivos diferentes hay  
+SELECT COUNT (DISTINCT nombre_cultivo) AS cultivos_diferentes FROM Cultivos;
+
+--3. Cual fue el cultivo de mayor inversión?
+SELECT nombre_cultivo, MAX(valor_inversion) AS valor_mayor_inversion FROM cultivos ;
+
+--4. Cual fue el cultivo de menor inversión?
+SELECT nombre_cultivo, MIN(valor_inversion) AS valor_Menor_inversion FROM cultivos ;
+
+--5. Quien es el propietario de la finca con el cultivo de mayor inversion?
+SELECT propietario, nombre_finca FROM Finca  
+WHERE id_finca = (
+	SELECT id_finca FROM Cultivos
+	WHERE valor_inversion = ( 
+		SELECT MAX(valor_inversion) FROM Cultivos
+	)
+);
+
+--6. Quien es el propietario de la finca con el cultivo de menor inversion?
+SELECT propietario, nombre_finca FROM Finca  
+WHERE id_finca = (
+	SELECT id_finca FROM Cultivos
+	WHERE valor_inversion = ( 
+		SELECT MIN(valor_inversion) FROM Cultivos
+		)
+	);
+
+--7.En que fecha se sembró mango en la finca de nombre: &quot;Unica&quot;
+--SELECT fecha_siembra FROM Cultivos
+--WHERE nombre_cultivo = 'mango' 
+--AND id_finca = (
+--SELECT id_finca FROM Finca WHERE nombre_finca = 'Unica');
+
+--8.Que propietario tiene más dinero invertido en sus cultivos?
+SELECT propietario, SUM(valor_inversion) AS total_inversion FROM Finca 
+INNER JOIN Cultivos ON Finca.id_finca = Cultivos.id_finca
+GROUP BY propietario
+ORDER BY total_inversion DESC
+LIMIT 1
+;
+
+--9. Listar el nombre de las fincas y el nombre de sus propietarios que tengan un area mayor a 10000 m2
+SELECT nombre_finca, propietario,tamanio_m2 FROM Finca
+WHERE tamanio_m2 &gt; 10000;
+
+--10. Listar el nombre de las fincas y el nombre de sus propietarios que tengan un cultivo de maiz
+SELECT nombre_finca, propietario FROM Finca
+WHERE id_finca IN (
+	SELECT id_finca FROM Cultivos
+	WHERE nombre_cultivo = &quot;maiz&quot;
+	);
+	
+--11. Listar el nombre de las fincas y el nombre de sus propietarios que tengan un cultivo de maiz y que el valor de la inversion sea mayor a 10000000
+SELECT nombre_finca, propietario FROM Finca
+WHERE id_finca IN (
+	SELECT id_finca FROM Cultivos
+	WHERE nombre_cultivo = &quot;maiz&quot; 
+	);
+
+--12. Listar el nombre de las fincas y el nombre de sus propietarios que tengan un cultivo de maiz y que el valor de la inversion sea mayor a 10000000 y que el cultivo tenga un sensor de temperatura
+SELECT nombre_finca, propietario FROM Finca
+INNER JOIN Cultivos ON Finca.id_finca = Cultivos.id_finca
+INNER JOIN Sensores ON Cultivos.id_cultivo = Sensores.id_cultivo
+WHERE Cultivos.nombre_cultivo = &quot;maiz&quot;
+  AND Cultivos.valor_inversion &gt; 10000000
+  AND Sensores.nombre_sensor LIKE &quot;%temperatura%&quot;;
+
+--13. Cual es el promedio de temperatura medida por los sensores?
+SELECT AVG(valor_medicion) AS temp_media FROM Medicion_sensores
+WHERE id_sensor IN (
+SELECT id_sensor FROM Sensores
+WHERE nombre_sensor like &quot;%temperatura%&quot;
+)
+AND fecha_medicion &lt; &quot;2023-11-01&quot;
+AND fecha_medicion &gt; &quot;2023-09-30&quot;
+;
+--14. Cual es el promedio de humedad medida por los sensores?
+SELECT AVG(valor_medicion) AS humedad_prom FROM Medicion_sensores
+WHERE id_sensor IN (
+SELECT id_sensor FROM Sensores
+WHERE nombre_sensor like &quot;%humedad%&quot;
+);
+
+--15. Realizar un query que muestre que cultivos tienen sensores de temperatura
+SELECT DISTINCT c.nombre_cultivo FROM Cultivos c
+INNER JOIN Sensores s ON c.id_cultivo = s.id_cultivo
+WHERE s.nombre_sensor LIKE &quot;%temperatura%&quot;;
+
+--16. Realizar un query que muestre que cultivos tienen sensores de humedad
+SELECT DISTINCT c.nombre_cultivo FROM Cultivos c
+INNER JOIN Sensores s ON c.id_cultivo = s.id_cultivo
+WHERE s.nombre_sensor LIKE &quot;%humedad%&quot;;
+
+--17. Realizar un query que muestre que cultivos tienen sensores de viento
+SELECT DISTINCT c.nombre_cultivo FROM Cultivos c
+INNER JOIN Sensores s ON c.id_cultivo = s.id_cultivo
+WHERE s.nombre_sensor LIKE &quot;%viento%&quot;;
+
+--18. En que mes se compraron mas sensores?
+
+
+--19. En que fecha se presentó las mas alta temperatura?
+SELECT fecha_medicion, MAX(valor_medicion) AS temp_max FROM Medicion_sensores
+WHERE id_sensor = (
+SELECT id_sensor FROM Sensores
+WHERE nombre_sensor like &quot;%temperatura%&quot;
+);
+
+--20. Que finca presentó la mas alta temperatura y en que fecha fue esto?
+SELECT f.nombre_finca, ms.fecha_medicion, ms.valor_medicion AS max_temperatura
+FROM Medicion_sensores ms
+INNER JOIN Sensores s ON ms.id_sensor = s.id_sensor
+INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+INNER JOIN Finca f ON c.id_finca = f.id_finca
+WHERE s.nombre_sensor LIKE &quot;%temperatura%&quot;
+ORDER BY max_temperatura DESC
+LIMIT 1;
+
+--21. Que finca presentó la mas alta humedad y en que fecha fue esto?
+SELECT f.nombre_finca, ms.fecha_medicion, ms.valor_medicion AS max_humedad
+FROM Medicion_sensores ms
+INNER JOIN Sensores s ON ms.id_sensor = s.id_sensor
+INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+INNER JOIN Finca f ON c.id_finca = f.id_finca
+WHERE s.nombre_sensor LIKE &quot;%humedad%&quot;
+ORDER BY max_humedad DESC
+LIMIT 1;
+
+--22. Que finca presentó la mas alta velocidad de viento y en que fecha fue esto?
+SELECT f.nombre_finca, ms.fecha_medicion, ms.valor_medicion AS max_velocidad
+FROM Medicion_sensores ms
+INNER JOIN Sensores s ON ms.id_sensor = s.id_sensor
+INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+INNER JOIN Finca f ON c.id_finca = f.id_finca
+WHERE s.nombre_sensor LIKE &quot;%viento%&quot;
+ORDER BY max_velocidad DESC
+LIMIT 1;
+
+--23. Cual es el promedio de temperatura para la finca &quot;la fuente&quot; entre los meses de enero y marzo?
+SELECT f.nombre_finca, AVG(ms.valor_medicion) AS temp_prom
+FROM Medicion_sensores ms
+INNER JOIN Sensores s ON ms.id_sensor = s.id_sensor
+INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+INNER JOIN Finca f ON c.id_finca = f.id_finca
+WHERE s.nombre_sensor LIKE &quot;%temperatura%&quot;
+AND f.nombre_finca = &quot;la fuente&quot;
+AND ms.fecha_medicion &gt;= &quot;2023-01-01&quot;
+AND ms.fecha_medicion &lt; &quot;2023-05-01&quot;;
+
+--24. Cual es el promedio de temperatura para la finca &quot;la fuente&quot; entre los meses de agosto y octubre?
+SELECT f.nombre_finca, AVG(ms.valor_medicion) AS temp_prom
+FROM Medicion_sensores ms
+INNER JOIN Sensores s ON ms.id_sensor = s.id_sensor
+INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+INNER JOIN Finca f ON c.id_finca = f.id_finca
+WHERE s.nombre_sensor LIKE &quot;%temperatura%&quot;
+AND f.nombre_finca = &quot;la fuente&quot;
+AND ms.fecha_medicion &gt;= &quot;2023-08-01&quot;
+AND ms.fecha_medicion &lt;= &quot;2023-11-01&quot;;
+
+--25. Cual es el sensor que más mediciones ha registrado?
+SELECT s.id_sensor, count(*) AS cantidad_mediciones,s.nombre_sensor  FROM Medicion_sensores ms
+INNER JOIN Sensores S ON ms.id_sensor = s.id_sensor
+GROUP BY s.id_sensor 
+ORDER BY cantidad_mediciones DESC
+LIMIT 1;
+
+--26. En que mes se registraron la mayor cantidad de mediciones?
+
+--27. Que finca tiene la menor cantidad de mediciones?
+SELECT f.id_finca, count(*) AS cantidad_mediciones,f.nombre_finca FROM Medicion_sensores ms
+INNER JOIN Sensores S ON ms.id_sensor = s.id_sensor
+INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+INNER JOIN Finca f ON c.id_finca = f.id_finca
+GROUP BY f.id_finca
+ORDER BY cantidad_mediciones ASC
+LIMIT 1;
+
+--28. Que valor de medicion tiene el sensor 14 en la fecha 2023-04-20?
+SELECT valor_medicion, fecha_medicion FROM Medicion_sensores 
+WHERE id_sensor = 14
+AND fecha_medicion = &quot;2023-04-20&quot;;
+
+--29. Cual es el telefono de Sofia en la tabla de &quot;Personal&quot;?
+SELECT telefono,nombre FROM Personal 
+WHERE nombre = &quot;Sofia&quot;;
+
+--30. Cual es la dirección de Nelson en la tabla de &quot;Personal&quot;?
+SELECT direccion, nombre FROM Personal
+WHERE nombre = &quot;Nelson&quot;;
+
+--31. Cuanto dinero recibió Nelson en el año 2022?
+SELECT SUM(valor_pago) AS dinero_recibido_2022 FROM Pagos
+WHERE id_personal=(
+SELECT id_personal FROM Personal
+WHERE nombre = &quot;Nelson&quot;)
+
+AND fecha_pago &lt; &quot;2023-01-01&quot;
+AND fecha_pago &gt; &quot;2021-12-31&quot;;
+
+--32. Cuanto dinero recibió Nelson en el año 2023?
+SELECT SUM(valor_pago) AS dinero_recibido_2023 FROM Pagos
+WHERE id_personal=(
+SELECT id_personal FROM Personal
+WHERE nombre = &quot;Nelson&quot;)
+AND fecha_pago &lt; &quot;2024-01-01&quot;
+AND fecha_pago &gt; &quot;2022-12-31&quot;;
+
+--33. Cuanto dinero en total se le ha pagado al personal de la finca &quot;Especial&quot;?
+SELECT SUM(valor_pago) AS pago_total FROM Pagos
+WHERE id_personal = ( 
+SELECT id_personal FROM Personal
+WHERE id_finca = ( 
+SELECT id_finca FROM Finca
+WHERE nombre_finca = &quot;Especial&quot;
+));
+--34. Cuanto dinero en total se le ha pagado al personal de la finca &quot;Unica&quot;?
+SELECT SUM(valor_pago) AS pago_total FROM Pagos
+WHERE id_personal = ( 
+SELECT id_personal FROM Personal
+WHERE id_finca = ( 
+SELECT id_finca FROM Finca
+WHERE nombre_finca = &quot;Unica&quot;
+));
+
+--35. En que fecha se hizo el pago más bajo registrado y a quien se le hizo?
+SELECT fecha_pago, id_personal FROM Pagos
+ORDER BY valor_pago
+LIMIT 1 ;
+
+--36. Que cultivo ha sido el que más dinero ha generado en ventas?
+SELECT nombre_cultivo, SUM(valor_venta) AS total_ventas
+FROM Ventas v
+INNER JOIN Cultivos c ON v.id_cultivo = c.id_cultivo
+GROUP BY c.nombre_cultivo
+ORDER BY total_ventas DESC
+LIMIT 1;
+
+--37. Que finca ha sido la que más dinero ha generado en ventas?
+SELECT SUM(v.valor_venta) dinero_generado, f.nombre_finca FROM Finca f
+INNER JOIN Cultivos c ON c.id_finca = f.id_finca
+INNER JOIN Ventas v ON v.id_cultivo = c.id_cultivo
+GROUP BY f.nombre_finca
+ORDER BY dinero_generado DESC
+LIMIT 1;
+
+--38. Que finca ha sido la que menos dinero ha generado en ventas?
+SELECT SUM(v.valor_venta) dinero_generado, f.nombre_finca FROM Finca f
+INNER JOIN Cultivos c ON c.id_finca = f.id_finca
+INNER JOIN Ventas v ON v.id_cultivo = c.id_cultivo
+GROUP BY f.nombre_finca
+ORDER BY dinero_generado ASC
+LIMIT 1;
+
+--39. En que fecha se registro la venta más alta y a que propietario de finca le pertenece?
+SELECT MAX(v.valor_venta) venta_max, v.fecha_venta, f.propietario, f.nombre_finca FROM Finca f
+INNER JOIN Cultivos c ON c.id_finca = f.id_finca
+INNER JOIN Ventas v ON v.id_cultivo = c.id_cultivo;
+
+--40. Hay algun cultivo que no haya generado ventas?
+SELECT nombre_cultivo FROM Cultivos
+WHERE id_cultivo = ( 
+SELECT id_cultivo FROM Ventas
+WHERE valor_venta = 0
+);
+
+--41. Que cultivo se vendió por un valor de 5611329?
+SELECT nombre_cultivo,id_finca FROM Cultivos
+WHERE id_cultivo = (
+SELECT id_cultivo FROM Ventas
+WHERE valor_venta = 5611329
+);
+
+--42. Muestre el promedio de las mediciones hechas para el cultivo que se vendió por ultima vez.
+SELECT AVG(valor_medicion) AS promedio
+FROM Medicion_sensores ms
+WHERE ms.id_sensor = (
+  SELECT s.id_sensor
+  FROM Sensores s
+  INNER JOIN Cultivos c ON s.id_cultivo = c.id_cultivo
+  INNER JOIN Ventas v ON c.id_cultivo = v.id_cultivo
+  ORDER BY v.fecha_venta DESC
+  LIMIT 1  
+);</sql><current_tab id="0"/></tab_sql></sqlb_project>
